@@ -1,6 +1,7 @@
 import pygame as pg
 import sys
-
+from map1 import *
+from tiles import Tile
 
 FPS = 60
 WIDTH = 800
@@ -261,6 +262,32 @@ def settings_menu():
         screen.blit(text_button_back, ((WIDTH // 2) - 200 // 2 + 56, (HEIGHT // 2) - 50 // 2 + 100 + 12, 200, 50))
         pg.display.flip()
 
+def lvl1():
+    screen.fill((0, 0, 0))
+    background = pg.image.load("first_level_materials/Background_01.png")
+    background1 = pg.image.load("first_level_materials/Background_02.png")
+    background = pg.transform.smoothscale(background, (800, 600))
+    background1 = pg.transform.smoothscale(background1, (800, 600))
+
+    clock = pg.time.Clock()
+
+    level = Level(level_map, screen)
+    #цикл окна
+    running = True
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+                pg.quit()
+                sys.exit()
+
+        screen.blit(background, (0, 0))
+        screen.blit(background1, (0, 0))
+        level.run()
+
+        pg.display.flip()
+        clock.tick(FPS)
+
 if __name__ == "__main__":
-    music_channel.play(menu_music)
-    menu()
+    #music_channel.play(menu_music)
+    lvl1()
