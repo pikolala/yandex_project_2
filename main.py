@@ -1,7 +1,7 @@
 import pygame as pg
 import sys
-from map1 import *
-from tiles import Tile
+from level import *
+from games_data import level_1
 
 FPS = 60
 WIDTH = 800
@@ -264,14 +264,11 @@ def settings_menu():
 
 def lvl1():
     screen.fill((0, 0, 0))
-    background = pg.image.load("first_level_materials/Background_01.png")
-    background1 = pg.image.load("first_level_materials/Background_02.png")
-    background = pg.transform.smoothscale(background, (800, 600))
-    background1 = pg.transform.smoothscale(background1, (800, 600))
-
+    background = pg.image.load("first_level_materials/background/Background.png")
     clock = pg.time.Clock()
 
-    level = Level(level_map, screen)
+    level = Level(level_1, screen)
+
     #цикл окна
     running = True
     while running:
@@ -280,9 +277,8 @@ def lvl1():
                 running = False
                 pg.quit()
                 sys.exit()
-
-        screen.blit(background, (0, 0))
-        screen.blit(background1, (0, 0))
+        #screen.blit(background, (0, 0))
+        screen.fill("black")
         level.run()
 
         pg.display.flip()
