@@ -1,11 +1,13 @@
 import pygame as pg
 import sys
-from level import *
+import level
 from games_data import level_1
 
 FPS = 60
 WIDTH = 800
 HEIGHT = 600
+PAUSE = False
+
 
 #загрузка настроек игрока
 s = open("menu_materials/settings.txt", "r").readlines()
@@ -136,6 +138,8 @@ def play_menu():
             #оброботка нажатий кнопок
             if button_back.clicked(event):
                 menu()
+            if level1_button.clicked(event):
+                lvl1()
 
         pg.display.flip()
 
@@ -262,14 +266,37 @@ def settings_menu():
         screen.blit(text_button_back, ((WIDTH // 2) - 200 // 2 + 56, (HEIGHT // 2) - 50 // 2 + 100 + 12, 200, 50))
         pg.display.flip()
 
-def lvl1():
-    screen.fill((0, 0, 0))
-    background = pg.image.load("first_level_materials/background/Background.png")
-    clock = pg.time.Clock()
+def escape_menu():
+    global PAUSE
+    PAUSE = not(PAUSE)
 
-    level = Level(level_1, screen)
+    # инициализация кнопок и др
+    background = pg.Surface((400, 300)).convert_alpha()
+    background.fill((128, 128, 128, 128))
+    screen.blit(background, (200, 150))
 
-    #цикл окна
+    button_start = Button(screen, pg.Color("darkslategray4"), (
+    (WIDTH // 2) - 200 // 2, (HEIGHT // 2) - 50 // 2 - 100, 200, 50))
+    button_settings = Button(screen, pg.Color("darkslategray4"), (
+    (WIDTH // 2) - 200 // 2, (HEIGHT // 2) - 50 // 2 - 0, 200, 50))
+
+    # текст
+    font = pg.font.Font(None, 36)
+    font1 = pg.font.Font(None, 52)
+    text = font1.render('Пауза', True, "yellow")
+    text1 = font1.render('Shift - Бег', True, "yellow")
+    text2 = font1.render('Space - Прыжок', True, "yellow")
+    text_button_start = font.render('Продолжить', True, (180, 0, 0))
+    text_button_settings = font.render('В меню', True, (180, 0, 0))
+
+    screen.blit(text2, (225, 400))
+    screen.blit(text1, (225, 350))
+    screen.blit(text, (0, 0))
+    screen.blit(text_button_start, ((button_start.button.centerx - button_start.button.centerx // 6, button_start.button.centery - button_start.button.centery // 14)))
+    screen.blit(text_button_settings, ((button_settings.button.centerx - button_settings.button.centerx // 10, button_settings.button.centery - button_settings.button.centery // 20)))
+
+
+    # цикл окна
     running = True
     while running:
         for event in pg.event.get():
@@ -277,13 +304,33 @@ def lvl1():
                 running = False
                 pg.quit()
                 sys.exit()
-        #screen.blit(background, (0, 0))
-        screen.fill("black")
-        level.run()
-
+            # оброботка нажатий по кнопкам
+            if button_start.clicked(event):
+                PAUSE = False
+                running = False
+            if button_settings.clicked(event):
+                PAUSE = False
+                menu()
         pg.display.flip()
-        clock.tick(FPS)
+def lvl1():
+    screen.fill((0, 0, 0))
+    clock = pg.time.Clock()
 
+    lvl = level.Level(level_1, screen)
+    running = True
+    #цикл окна
+    while running:
+        if PAUSE == False:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+            screen.fill((0, 0, 0))
+            lvl.run()
+
+            pg.display.flip()
+            clock.tick(FPS)
 if __name__ == "__main__":
     #music_channel.play(menu_music)
     lvl1()

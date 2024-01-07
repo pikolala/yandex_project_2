@@ -21,7 +21,7 @@ class Player(pg.sprite.Sprite):
 
         #движение игрока
         self.direction = pg.math.Vector2(0,0)
-        self.speed = 8
+        self.speed = 4
         self.gravity = 0.8
         self.jump_speed = -16
 
@@ -36,7 +36,7 @@ class Player(pg.sprite.Sprite):
     #импорт анимаций
     def import_character_assets(self):
         character_path = "Hero/"
-        self.animations = {"idle":[], "walk":[], "jump":[], "fall":[]}
+        self.animations = {"idle":[], "walk":[], "jump":[], "fall":[], "run":[]}
 
         for animation in self.animations.keys():
             full_path = character_path + animation
@@ -85,18 +85,22 @@ class Player(pg.sprite.Sprite):
             self.facing_right = False
         else:
             self.direction.x = 0
-
         if keys[pg.K_SPACE] and self.on_ground:
             self.jump()
+
     #получение статуса
     def get_status(self):
+        keys = pg.key.get_pressed()
         if self.direction.y < 0:
             self.status = "jump"
         elif self.direction.y > 1:
             self.status = "fall"
         else:
             if self.direction.x != 0:
-                self.status = "walk"
+                if keys[pg.K_LSHIFT]:
+                    self.status = "run"
+                else:
+                    self.status = "walk"
             else:
                 self.status = "idle"
 

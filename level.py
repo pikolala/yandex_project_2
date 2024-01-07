@@ -1,3 +1,4 @@
+import main
 import pygame as pg
 import csv
 from tiles import *
@@ -33,7 +34,7 @@ class Level:
     def __init__(self, level_data, surface):
         #инициализация переменных
         self.display_surface = surface
-        self.world_shift = -1
+        self.world_shift = 0
 
         #инициализация игрока
         player_layout = import_csv_layout(level_data["player"])
@@ -125,16 +126,26 @@ class Level:
         player = self.player.sprite
         player_x = player.rect.centerx
         direction_x = player.direction.x
-
+        keys = pg.key.get_pressed()
         if player_x < 100 and direction_x < 0:
-            self.world_shift = 8
+            if keys[pg.K_LSHIFT]:
+                self.world_shift = 8
+            else:
+                self.world_shift = 4
             player.speed = 0
+
         elif player_x > 200 and direction_x > 0:
-            self.world_shift = -8
+            if keys[pg.K_LSHIFT]:
+                self.world_shift = -8
+            else:
+                self.world_shift = -4
             player.speed = 0
         else:
+            if player.status == "run":
+                player.speed = 8
+            else:
+                player.speed = 4
             self.world_shift = 0
-            player.speed = 8
 
     #горизонтальная коллизия
     def horizontal_movment_collision(self):
@@ -177,6 +188,19 @@ class Level:
             player.on_ground = False
         if player.on_ceiling and player.direction.y > 0:
             player.on_ceiling = False
+
+    def check_death(self):
+        if self.player.sprite.rect.top > 600:
+            main.menu()
+
+    def check_win(self):
+        if pg.sprite.spritecollide(self.player.sprite, self.finish, False):
+            main.menu()
+
+    def pause(self):
+        keys = pg.key.get_pressed()
+        if keys[pg.K_ESCAPE]:
+            main.escape_menu()
     def run(self):
         self.background_sprite.update(self.world_shift)
         self.background_sprite.draw(self.display_surface)
@@ -203,3 +227,7 @@ class Level:
         self.finish.update(self.world_shift)
         self.finish.draw(self.display_surface)
 
+        self.check_death()
+        self.check_win()
+
+        self.pause()
