@@ -191,11 +191,23 @@ class Level:
 
     def check_death(self):
         if self.player.sprite.rect.top > 600:
-            main.menu()
+            main.user_interface.death()
+            main.user_interface.update()
+            main.lvl1()
+
 
     def check_win(self):
         if pg.sprite.spritecollide(self.player.sprite, self.finish, False):
-            main.menu()
+            main.finish_menu()
+
+    def check_enemy_collisions(self):
+        player = self.player.sprite
+
+        for sprite in self.terrain_sprites.sprites() + self.slime_sprites.sprites() + self.spike_sprites.sprites():
+            if sprite.rect.colliderect(player.rect):
+                main.user_interface.death()
+                main.user_interface.update()
+                main.lvl1()
 
     def pause(self):
         keys = pg.key.get_pressed()
@@ -229,5 +241,7 @@ class Level:
 
         self.check_death()
         self.check_win()
+
+        self.check_enemy_collisions()
 
         self.pause()
