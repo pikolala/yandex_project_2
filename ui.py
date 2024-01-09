@@ -1,6 +1,10 @@
 import main
 import pygame as pg
 
+pg.mixer.init()
+
+death_sound = pg.mixer.Sound("Hero/sound/88_Teleport_02.wav")
+
 class UI:
     def __init__(self, surface):
         #настрока
@@ -22,6 +26,8 @@ class UI:
         self.health.draw(self.display_surface)
 
     def death(self):
+        death_sound.set_volume(main.SOUND_VOLUME)
+        death_sound.play()
         self.current_health -= 1
         if self.current_health == 0:
             main.death_menu()

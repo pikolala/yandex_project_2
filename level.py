@@ -33,6 +33,8 @@ def import_cut_graphics(path):
 class Level:
     def __init__(self, level_data, surface):
         #инициализация переменных
+        self.level_music = pg.mixer.Sound("first_level_materials/level_music.mp3")
+        main.music_channel.play(self.level_music, loops=-1)
         self.display_surface = surface
         self.world_shift = 0
 

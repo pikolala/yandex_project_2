@@ -1,11 +1,10 @@
 import pygame as pg
 from tiles import AnimatedTile
-from  random import randint
 class Enemy(AnimatedTile):
     def __init__(self, size, x, y):
         super().__init__(size, x, y, "first_level_materials/slime")
         self.rect.y += 8
-        self.speed = randint(1, 3)
+        self.speed = 3
 
     def reverse_image(self):
         if self.speed > 0:

@@ -1,5 +1,9 @@
 import pygame as pg
 import os
+import main
+
+jump_sound = pg.mixer.Sound("Hero/sound/30_Jump_03.wav")
+jump_sound.set_volume(main.SOUND_VOLUME)
 
 #импорт анимаций
 def import_folder(path):
@@ -87,6 +91,7 @@ class Player(pg.sprite.Sprite):
             self.direction.x = 0
         if keys[pg.K_SPACE] and self.on_ground:
             self.jump()
+            jump_sound.play()
 
     #получение статуса
     def get_status(self):
@@ -103,6 +108,7 @@ class Player(pg.sprite.Sprite):
                     self.status = "walk"
             else:
                 self.status = "idle"
+
 
     def apply_gravity(self):
         self.direction.y += self.gravity

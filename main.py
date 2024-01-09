@@ -28,6 +28,8 @@ music_channel = pg.mixer.Channel(1)
 #инициализация звука и музыки
 menu_music = pg.mixer.Sound("menu_materials/menu_music.mp3")
 buttons_sound = pg.mixer.Sound("menu_materials/press_button.mp3")
+finish_music = pg.mixer.Sound("menu_materials/finish_music.mp3")
+death_music = pg.mixer.Sound("menu_materials/death_music.mp3")
 
 #настройка громкости
 sound_channel.set_volume(SOUND_VOLUME)
@@ -271,6 +273,8 @@ def settings_menu():
 def escape_menu():
     global PAUSE
     PAUSE = not(PAUSE)
+    music_channel.pause()
+
 
     # инициализация кнопок и др
     background = pg.Surface((400, 300)).convert_alpha()
@@ -308,14 +312,17 @@ def escape_menu():
                 sys.exit()
             # оброботка нажатий по кнопкам
             if button_start.clicked(event):
+                music_channel.unpause()
                 PAUSE = False
                 running = False
             if button_settings.clicked(event):
                 PAUSE = False
+                music_channel.play(menu_music, loops=-1)
                 menu()
         pg.display.flip()
 
 def finish_menu():
+    music_channel.play(finish_music)
     global PAUSE
     PAUSE = not(PAUSE)
 
@@ -355,10 +362,12 @@ def finish_menu():
                 running = False
             if button_settings.clicked(event):
                 PAUSE = False
+                music_channel.play(menu_music, loops=-1)
                 menu()
         pg.display.flip()
 
 def death_menu():
+    music_channel.play(death_music)
     global PAUSE
     PAUSE = not(PAUSE)
 
@@ -398,6 +407,7 @@ def death_menu():
                 running = False
                 user_interface.current_health = 5
                 user_interface.update()
+                music_channel.play(menu_music, loops=-1)
                 menu()
             if button_settings.clicked(event):
                 PAUSE = False
@@ -405,6 +415,7 @@ def death_menu():
                 sys.exit()
         pg.display.flip()
 def lvl1():
+    music_channel.stop()
     screen.fill((0, 0, 0))
     clock = pg.time.Clock()
 
@@ -425,5 +436,5 @@ def lvl1():
             pg.display.flip()
             clock.tick(FPS)
 if __name__ == "__main__":
-    #music_channel.play(menu_music)
-    lvl1()
+    music_channel.play(menu_music, loops=-1)
+    menu()
