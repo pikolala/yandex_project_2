@@ -1,8 +1,9 @@
 import pygame as pg
 import sys
 import level
+import level2
 from ui import UI
-from games_data import level_1
+from games_data import level_1, level_2
 
 FPS = 60
 WIDTH = 800
@@ -325,6 +326,7 @@ def finish_menu():
     music_channel.play(finish_music)
     global PAUSE
     PAUSE = not(PAUSE)
+    s = open("menu_materials/levels.txt").readline()
 
     # инициализация кнопок и др
     background = pg.Surface((400, 300)).convert_alpha()
@@ -360,6 +362,14 @@ def finish_menu():
             if button_start.clicked(event):
                 PAUSE = False
                 running = False
+                s += "+"
+                f = open("menu_materials/levels.txt", "w")
+                f.write(s)
+                f.close()
+                if s.count("+") == 2:
+                    lvl2()
+                elif s.count("+") == 3:
+                    pass
             if button_settings.clicked(event):
                 PAUSE = False
                 music_channel.play(menu_music, loops=-1)
@@ -407,6 +417,9 @@ def death_menu():
                 running = False
                 user_interface.current_health = 5
                 user_interface.update()
+                f = open("menu_materials/levels.txt", "w")
+                f.write("+")
+                f.close()
                 music_channel.play(menu_music, loops=-1)
                 menu()
             if button_settings.clicked(event):
@@ -423,18 +436,39 @@ def lvl1():
     running = True
     #цикл окна
     while running:
-        if PAUSE == False:
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    running = False
-                    pg.quit()
-                    sys.exit()
-            screen.fill((0, 0, 0))
-            lvl.run()
-            user_interface.show_health()
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+                pg.quit()
+                sys.exit()
+        screen.fill((0, 0, 0))
+        lvl.run()
+        user_interface.show_health()
 
-            pg.display.flip()
-            clock.tick(FPS)
+        pg.display.flip()
+        clock.tick(FPS)
+
+def lvl2():
+    music_channel.stop()
+    screen.fill((0, 0, 0))
+    clock = pg.time.Clock()
+
+    lvl = level2.Level(level_2, screen)
+    running = True
+    #цикл окна
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+                pg.quit()
+                sys.exit()
+        screen.fill((0, 0, 0))
+        lvl.run()
+        user_interface.show_health()
+
+        pg.display.flip()
+        clock.tick(FPS)
+
 if __name__ == "__main__":
     music_channel.play(menu_music, loops=-1)
-    menu()
+    lvl2()

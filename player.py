@@ -2,8 +2,9 @@ import pygame as pg
 import os
 import main
 
+main.pg.mixer.init()
 jump_sound = pg.mixer.Sound("Hero/sound/30_Jump_03.wav")
-jump_sound.set_volume(main.SOUND_VOLUME)
+#jump_sound.set_volume(main.SOUND_VOLUME)
 
 #импорт анимаций
 def import_folder(path):

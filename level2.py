@@ -6,7 +6,10 @@ from enemy import *
 from decoration import *
 from player import *
 
+from functools import cache
+
 tile_size = 36
+
 def import_csv_layout(path):
     terrain_map = []
     with open(path) as map:
@@ -15,6 +18,7 @@ def import_csv_layout(path):
             terrain_map.append(list(row))
         return terrain_map
 
+@cache
 def import_cut_graphics(path):
     surface = pg.image.load(path).convert_alpha()
     tile_num_x = int(surface.get_size()[0] / tile_size)
@@ -33,7 +37,7 @@ def import_cut_graphics(path):
 class Level:
     def __init__(self, level_data, surface):
         #инициализация переменных
-        self.level_music = pg.mixer.Sound("first_level_materials/level_music.mp3")
+        self.level_music = pg.mixer.Sound("second_level_materials/chocolate-chip-by-uncle-morris.mp3")
         main.music_channel.play(self.level_music, loops=-1)
         self.display_surface = surface
         self.world_shift = 0
@@ -60,13 +64,21 @@ class Level:
         slime_layout = import_csv_layout(level_data["slime"])
         self.slime_sprites = self.create_tile_group(slime_layout, "slime")
 
+        #инициализация подвижных плиток
+        moveable_terrain_layout = import_csv_layout(level_data["moveable terrain"])
+        self.moveable_terrain_sprites = self.create_tile_group(moveable_terrain_layout, "moveable terrain")
+
+        #инициализация пчелы
+        bee_layout = import_csv_layout(level_data["bee"])
+        self.bee_sprites = self.create_tile_group(bee_layout, "bee")
+
         #инициализация ограничений
         constraints_layout = import_csv_layout(level_data["constraints"])
         self.constraints_sprites = self.create_tile_group(constraints_layout, "constraints")
 
         self.background_sprite = pg.sprite.Group()
-        for i in range(-1000, 4000, 1000):
-            self.background_sprite.add(Background(i, 0, "first_level_materials/background/Background.png"))
+        for i in range(-1000, 5000, 1000):
+            self.background_sprite.add(Background(i, 0, "second_level_materials/Background/Background.png"))
 
     def player_setup(self, layout):
         for row_index, row in enumerate(layout):
@@ -89,17 +101,17 @@ class Level:
                 if val != "-1":
                     x = col_index * tile_size
                     y = row_index * tile_size
-
+                    sprite = ""
                     if type == "terrain":
-                        terrain_tile_list = import_cut_graphics("first_level_materials/terrain.png")
+                        terrain_tile_list = import_cut_graphics("second_level_materials/terrain.png")
                         tile_surface = terrain_tile_list[int(val)]
                         sprite = StaticTile(tile_size, x, y, tile_surface)
 
 
                     if type == "decor":
-                        decor_tile_list = import_cut_graphics("first_level_materials/decor.png")
+                        decor_tile_list = import_cut_graphics("second_level_materials/decor.png")
                         tile_surface = decor_tile_list[int(val)]
-                        sprite = Decor(tile_size, x, y, tile_surface, 20)
+                        sprite = Decor(tile_size, x, y, tile_surface, 0)
 
 
                     if type == "spikes":
@@ -108,6 +120,14 @@ class Level:
 
                     if type == "slime":
                         sprite = Slime(tile_size, x, y, "first_level_materials/slime", 3)
+                        sprite_group.add((sprite))
+
+                    if type == "moveable terrain":
+                        sprite = MoveableTerrain(tile_size * 3, x, y, "second_level_materials/moveable_ground", 2)
+                        sprite_group.add((sprite))
+
+                    if type == "bee":
+                        sprite = Bee(tile_size + 1, x, y, "second_level_materials/bee", -5)
                         sprite_group.add((sprite))
 
                     if type == "constraints":
@@ -119,7 +139,7 @@ class Level:
         return sprite_group
 
     def enemy_collision_reverse(self):
-        for enemy in self.slime_sprites.sprites():
+        for enemy in self.slime_sprites.sprites() + self.moveable_terrain_sprites.sprites() + self.bee_sprites.sprites():
             if pg.sprite.spritecollide(enemy, self.constraints_sprites, False):
                 enemy.reverse()
 
@@ -155,7 +175,7 @@ class Level:
 
         player.rect.x += player.direction.x * player.speed
 
-        for sprite in self.terrain_sprites.sprites():
+        for sprite in self.terrain_sprites.sprites() + self.moveable_terrain_sprites.sprites():
             if sprite.rect.colliderect(player.rect):
                 if player.direction.x < 0:
                     player.rect.left = sprite.rect.right
@@ -186,6 +206,15 @@ class Level:
                     player.rect.top = sprite.rect.bottom
                     player.on_ceiling = True
 
+        for sprite in self.moveable_terrain_sprites.sprites():
+            if sprite.rect.colliderect(player.rect):
+                if player.direction.y > 0:
+                    player.rect.bottom = sprite.rect.top
+                    player.direction.y = 0
+                    player.on_ground = True
+                    self.world_shift -= sprite.speed
+
+
         if player.on_ground and player.direction.y < 0 or player.direction.y > 1:
             player.on_ground = False
         if player.on_ceiling and player.direction.y > 0:
@@ -195,7 +224,7 @@ class Level:
         if self.player.sprite.rect.top > 600:
             main.user_interface.death()
             main.user_interface.update()
-            main.lvl1()
+            main.lvl2()
 
 
     def check_win(self):
@@ -205,11 +234,11 @@ class Level:
     def check_enemy_collisions(self):
         player = self.player.sprite
 
-        for sprite in self.terrain_sprites.sprites() + self.slime_sprites.sprites() + self.spike_sprites.sprites():
+        for sprite in self.terrain_sprites.sprites() + self.slime_sprites.sprites() + self.spike_sprites.sprites() + self.bee_sprites.sprites():
             if sprite.rect.colliderect(player.rect):
                 main.user_interface.death()
                 main.user_interface.update()
-                main.lvl1()
+                main.lvl2()
 
     def pause(self):
         keys = pg.key.get_pressed()
@@ -232,6 +261,12 @@ class Level:
         self.constraints_sprites.update(self.world_shift)
         self.enemy_collision_reverse()
         self.slime_sprites.draw(self.display_surface)
+
+        self.moveable_terrain_sprites.update(self.world_shift)
+        self.moveable_terrain_sprites.draw(self.display_surface)
+
+        self.bee_sprites.update(self.world_shift)
+        self.bee_sprites.draw(self.display_surface)
 
         self.player.update()
         self.scroll_x()
