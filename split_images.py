@@ -17,10 +17,13 @@ def s2(path):
         new_img.save(f"{'/'.join(i.split('/')[0:2])}/{k}.png")
 
 def s1(path):
+    k = 0
     im = Image.open(path)
-    for k, i in enumerate(range(48, 289, 48)):
-        new_img = im.crop((i - 48, 12, i, 48))
-        new_img.save(f"{'/'.join(path.split('/')[0:2])}/{k}.png")
+    for j in range(80, 321, 80):
+        for i in (range(80, 241, 80)):
+            new_img = im.crop((i - 80, j - 80, i, j))
+            new_img.save(f"{'/'.join(path.split('/')[0:2])}/{k}.png")
+            k += 1
 
 def tr(path):
     for i in path:
@@ -28,4 +31,4 @@ def tr(path):
         im = im.resize((36, 36), PIL.Image.LANCZOS)
         im.save(i)
 
-s2(import_folder("Hero/run"))
+s1("third_level_materials/wizard/F1uWk1.png")

@@ -37,3 +37,24 @@ class Bee(Enemy):
         super().__init__(size, x, y, path, speed)
         self.rect.y -= 36
         self.rect.x -= 1
+
+class Wizard(AnimatedTile):
+    def __init__(self, size, x, y, path):
+        super().__init__(size, x, y, path)
+        self.rect.bottomleft = self.rect.topleft
+        self.s = 0.08
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, x, y, screen):
+        super().__init__()
+        self.image = pg.image.load("third_level_materials/bullet1.png")
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.display = screen
+
+    def update(self, world_shift):
+        self.rect.x += world_shift
+        self.rect.x -= 6
+        self.display.blit(self.image, self.rect)
+

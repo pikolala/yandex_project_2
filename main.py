@@ -2,8 +2,9 @@ import pygame as pg
 import sys
 import level
 import level2
+import level3
 from ui import UI
-from games_data import level_1, level_2
+from games_data import level_1, level_2, level_3
 
 FPS = 60
 WIDTH = 800
@@ -145,6 +146,10 @@ def play_menu():
                 menu()
             if level1_button.clicked(event):
                 lvl1()
+            if level2_button.clicked(event):
+                lvl2()
+            if level3_button.clicked(event):
+                lvl3()
 
         pg.display.flip()
 
@@ -369,7 +374,45 @@ def finish_menu():
                 if s.count("+") == 2:
                     lvl2()
                 elif s.count("+") == 3:
-                    pass
+                    lvl3()
+            if button_settings.clicked(event):
+                PAUSE = False
+                music_channel.play(menu_music, loops=-1)
+                menu()
+        pg.display.flip()
+
+def last_finish_menu():
+    music_channel.play(finish_music)
+    global PAUSE
+    PAUSE = not(PAUSE)
+
+    # инициализация кнопок и др
+    background = pg.Surface((400, 300)).convert_alpha()
+    background.fill((128, 128, 128, 128))
+    screen.blit(background, (200, 150))
+
+    button_settings = Button(screen, pg.Color("darkslategray4"), (
+    (WIDTH // 2) - 200 // 2, (HEIGHT // 2) - 50 // 2 - 50, 200, 50))
+
+    # текст
+    font = pg.font.Font(None, 36)
+    font1 = pg.font.Font(None, 52)
+    text = font1.render('Игра пройдена', True, "yellow")
+    text_button_settings = font.render('В меню', True, (180, 0, 0))
+
+    screen.blit(text, (270, 350))
+    screen.blit(text_button_settings, ((button_settings.button.centerx - button_settings.button.centerx // 10, button_settings.button.centery - button_settings.button.centery // 20)))
+
+
+    # цикл окна
+    running = True
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+                pg.quit()
+                sys.exit()
+            # оброботка нажатий по кнопкам
             if button_settings.clicked(event):
                 PAUSE = False
                 music_channel.play(menu_music, loops=-1)
@@ -424,6 +467,12 @@ def death_menu():
                 menu()
             if button_settings.clicked(event):
                 PAUSE = False
+                running = False
+                user_interface.current_health = 5
+                user_interface.update()
+                f = open("menu_materials/levels.txt", "w")
+                f.write("+")
+                f.close()
                 pg.quit()
                 sys.exit()
         pg.display.flip()
@@ -469,6 +518,28 @@ def lvl2():
         pg.display.flip()
         clock.tick(FPS)
 
+def lvl3():
+    music_channel.stop()
+    screen.fill((0, 0, 0))
+    clock = pg.time.Clock()
+
+    lvl = level3.Level(level_3, screen)
+    running = True
+    #цикл окна
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+                pg.quit()
+                sys.exit()
+        screen.fill((0, 0, 0))
+        lvl.run()
+        user_interface.show_health()
+
+        pg.display.flip()
+        clock.tick(FPS)
+
+
 if __name__ == "__main__":
     music_channel.play(menu_music, loops=-1)
-    lvl2()
+    lvl3()
